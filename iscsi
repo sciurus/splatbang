@@ -1,0 +1,80 @@
+#!/bin/bash
+
+if [ -r ~/.iscsi ]; then
+  source ~/.iscsi
+fi
+
+if [ -z "$PORTAL" ]; then
+  echo PORTAL is not set
+  echo "You must export this in your shell or add it to  ~/.iscsi"
+  echo "Example:"
+  echo "PORTAL=10.1.1.1"
+  exit 1
+fi
+
+function print_usage {
+    echo "You must provide the operation and, if applicable, the target"
+    echo "Examples:"
+    echo "$0 discover"
+    echo "$0 session"
+    echo "$0 login iqn.2001-05.com.equallogic:0-aaaaaa-bbbbbbbbb-cccccccccccccccc-example"
+    echo "$0 logout iqn.2001-05.com.equallogic:0-aaaaaa-bbbbbbbbb-cccccccccccccccc-example"
+    echo "$0 rescan iqn.2001-05.com.equallogic:0-aaaaaa-bbbbbbbbb-cccccccccccccccc-example"
+    echo "$0 delete iqn.2001-05.com.equallogic:0-aaaaaa-bbbbbbbbb-cccccccccccccccc-example"
+    exit 1
+}
+
+# the operation must be specified
+if [ $# -eq 0 ]; then
+    print_usage
+fi
+
+OPERATION=$1
+
+case $OPERATION in
+    discover)
+        # Update the list of iscsi volumes available from the storage device
+        sudo iscsiadm --mode discovery --portal $PORTAL --type sendtargets
+        exit 0
+        ;;
+    session)
+        # See the names and device nods of the iscsi volumes I'm logged in to
+        sudo iscsiadm --mode session -P 3
+        exit 0
+        ;;
+    *)
+        # for remaining operations, the target must be specified
+        if [ $# -ne 2 ]; then
+            print_usage
+        fi
+        ;;
+esac
+
+TARGET=$2
+
+case $OPERATION in
+    login)
+        # Log in to an iscsi volume
+        sudo iscsiadm --mode node --portal $PORTAL --targetname $TARGET --login
+        exit 0
+        ;;
+    logout)
+        # Log out of an iscsi volume
+        sudo iscsiadm --mode node --portal $PORTAL --targetname $TARGET --logout
+        exit 0
+        ;;
+    rescan)
+        # Get the new size of an iscsi volume I expanded
+        sudo iscsiadm --mode node --portal $PORTAL --targetname $TARGET --rescan
+        exit 0
+        ;;
+    delete)
+        # Delete the record of an unused iscsi volume so the server won't automatically try to login on the next reboot
+        sudo iscsiadm --mode node --portal $PORTAL --targetname $TARGET -o delete
+        exit 0
+        ;;
+    *)
+        echo "Unknown operation $OPERATION"
+        print_usage
+    ;;
+esac

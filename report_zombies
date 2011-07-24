@@ -1,0 +1,12 @@
+#!/bin/sh
+
+OUTPUT="zombies.$(date +%s)"
+ZOMBIES=$(ps -ef | awk '/defunct/ {print $2}' | sort)
+for z in $ZOMBIES; do
+    if [ -r /proc/$z ]; then
+        PARENT="$(awk '/PPid/ {print $2}' /proc/$z/status)"
+        ps -p $z u >> $OUTPUT
+        ps -p $PARENT u >> $OUTPUT
+        echo '' >> $OUTPUT
+    fi
+done

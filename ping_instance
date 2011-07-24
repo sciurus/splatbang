@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]; then
+    echo "USAGE: $0 oracle_instance_name"
+    exit 1
+fi
+
+INSTANCE=$1
+
+# sets ORACLE_HOME and PATH
+if [ -f /etc/profile.d/oracle.sh ]; then
+    source /etc/profile.d/oracle.sh
+fi
+
+
+# match errors like TNS-12543: TNS:destination host unreachable
+tnsping $INSTANCE | egrep -q '[A-Z]{3}-[0-9]{5}'
+NO_ERROR=$?
+
+if [ $NO_ERROR == 0 ]; then
+    echo Could not connect to $INSTANCE
+    tnsping $INSTANCE
+    exit 1
+else
+    exit 0
+fi

@@ -1,0 +1,24 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]
+then
+  echo "Usage: socks hostname"
+  exit 255
+fi
+
+EXISTING=$(pgrep -f 'ssh -fND 8080')
+
+if [ $? = 0 ]
+then
+  echo "Killing existing tunnel $EXISTING"
+  kill $EXISTING
+fi
+
+ssh -fND 8080 $1
+
+if [ $? = 0 ]
+then
+  echo "SOCKS tunnel established on port 8080 to $1"
+else
+  exit $?
+fi

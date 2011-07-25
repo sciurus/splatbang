@@ -1,1 +1,9 @@
 This is a catchall repository for tracking handy scripts too simple to justify their own repository.
+
+ * iscsi: simplifies use of iscsiadm
+ * lastday: execute a command on last day of the month
+ * ping\_instance: report reachability of an oracle instance
+ * ping\_server: report reachability of a server
+ * report\_zombies: generate report on zombie processes and their parents
+ * scan\_port: report reachability of service listening on a TCP port
+ * socks: simplifies setup of port forwarding via ssh SOCKS proxy

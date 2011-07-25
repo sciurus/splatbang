@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+# Sample usage: ruby lastday.rb "echo pay your rent"
+
+require 'date'
+require 'syslog'
+
+# reopen Date class to add new instance method
+class Date
+  def last_day_of_the_month?
+    da = self
+    (da += 1).month == self.month ? false : true
+  end
+end
+
+if Date.today.last_day_of_the_month?
+  log = Syslog.open("lastday")  
+  ARGV.each do |arg|
+    if system(arg)
+      log.notice("#{arg} ran successfully")
+    else
+      log.err("#{arg} exited with status #{$?}")
+    end
+  end
+end

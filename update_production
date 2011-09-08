@@ -1,0 +1,33 @@
+#!/bin/sh
+set -u
+
+REPOS="base updates cr epel"
+AGE="7"
+EXCLUDE=""
+
+# i'm not sure of the exact meaning of time_file or time_build
+# but time_file seems to better reflect when things are added to centos archives
+# e.g. select name, time_build, time_file from packages where name = "zlib";
+# zlib  1305111435  1315077865
+# the first data is May 11 the second is Sep 3rd
+# the package was updated Sep 3rd
+# http://lists.centos.org/pipermail/centos-cr-announce/2011-September/000250.html
+
+# update database of available updates
+sudo yum check-update > /dev/null
+if [ $? = 1 ]; then
+    echo "Error fetching available updates"
+    exit 1
+fi
+
+for R in $REPOS; do
+    if [ -f "/var/cache/yum/$R/primary.sqlite" ]; then
+        # find updates that were released in last $AGE days
+        for P in $(sqlite3 /var/cache/yum/$R/primary.sqlite "select name from packages where time_file > strftime('%s', 'now', 'start of day', '-$AGE day');"); do
+            EXCLUDE="$EXCLUDE --exclude=$P"
+        done
+    fi
+done
+
+# install all updates releases more than $AGE days ago
+sudo yum update $EXCLUDE

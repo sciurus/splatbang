@@ -17,11 +17,36 @@ function print_usage {
     echo "Examples:"
     echo "$0 discover"
     echo "$0 session"
+    echo "$0 targets"
+    echo "$0 devices"
+    echo "$0 tardev"
     echo "$0 login iqn.2001-05.com.equallogic:0-aaaaaa-bbbbbbbbb-cccccccccccccccc-example"
     echo "$0 logout iqn.2001-05.com.equallogic:0-aaaaaa-bbbbbbbbb-cccccccccccccccc-example"
     echo "$0 rescan iqn.2001-05.com.equallogic:0-aaaaaa-bbbbbbbbb-cccccccccccccccc-example"
     echo "$0 delete iqn.2001-05.com.equallogic:0-aaaaaa-bbbbbbbbb-cccccccccccccccc-example"
     exit 1
+}
+
+function print_targets_devices {
+    for S in /sys/class/iscsi_session/session*; do
+        cd $S
+        if [ $PRINT_TARGETS ]; then
+            TARGET_NAME=$(cat targetname)
+            echo -n $TARGET_NAME
+            if [ $PRINT_DEVICES ]; then
+                echo -ne '\t'
+            else
+                echo -ne '\n'
+            fi
+        fi
+        # maybe there is abetter way to associate targets with devices?
+        cd device
+        cd target*
+        cd [0-9]*
+        if [ $PRINT_DEVICES ]; then
+            basename $(readlink -e block:*)
+        fi
+    done
 }
 
 # the operation must be specified
@@ -38,8 +63,29 @@ case $OPERATION in
         exit 0
         ;;
     session)
-        # See the names and device nods of the iscsi volumes I'm logged in to
+        # See the session information of the iscsi volumes I'm logged in to
         sudo iscsiadm --mode session -P 3
+        exit 0
+        ;;
+    targets)
+        # print names of iscsi targets
+        PRINT_TARGETS='yep'
+        PRINT_DEVICES=''
+        print_targets_devices
+        exit 0
+        ;;
+    devices)
+        # print block device names of iscsi targets
+        PRINT_TARGETS=''
+        PRINT_DEVICES='yep'
+        print_targets_devices
+        exit 0
+        ;;
+    tardev)
+        # print targets and their device seperated by tab
+        PRINT_TARGETS='yep'
+        PRINT_DEVICES='yep'
+        print_targets_devices
         exit 0
         ;;
     *)

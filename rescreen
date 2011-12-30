@@ -36,7 +36,7 @@ done
 for CHILD_PID in $(ps --ppid $PID -o 'pid='); do
     CHILD_CMD=$(ps --pid $CHILD_PID -o 'cmd=')
     if [ "$CHILD_CMD" = '/bin/bash' ]; then
-        kill -SIGUSR1 $CHILD_PID
+        kill -USR1 $CHILD_PID
     fi
 done
 

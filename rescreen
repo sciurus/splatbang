@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# put something like the following in your .bashrc
+# trap "if [ -f "$HOME/.rescreen_environment" ]; then source $HOME/.rescreen_environment; fi" SIGUSR1
+
+OUTPUT="$HOME/.rescreen_environment"
+
+VARIABLES="SSH_CLIENT
+SSH_TTY
+SSH_AUTH_SOCK
+SSH_CONNECTION
+DISPLAY"
+
+SCREEN_NAME=$1
+
+# format is pid.name
+PID_AND_NAME=$(screen -list | awk "/$SCREEN_NAME/ {print \$1}")
+if [ -z "$PID_AND_NAME" ]; then
+    echo "There is no screen to be resumed matching $SCREEN_NAME."
+    exit 1
+fi
+PID=${PID_AND_NAME%%.$SCREEN_NAME}
+
+if [ -f "$OUTPUT" ]; then
+    rm $OUTPUT
+fi
+
+for NAME in $VARIABLES; do
+    VALUE=$(eval "echo \$$NAME")
+    if [ -n "$VALUE" ]; then
+        screen -S $SCREEN_NAME -X setenv $NAME $VALUE
+        echo "export $NAME=$VALUE" >> $OUTPUT
+    fi
+done
+
+for CHILD_PID in $(ps --ppid $PID -o 'pid='); do
+    CHILD_CMD=$(ps --pid $CHILD_PID -o 'cmd=')
+    if [ "$CHILD_CMD" = '/bin/bash' ]; then
+        kill -SIGUSR1 $CHILD_PID
+    fi
+done
+
+screen -r $SCREEN

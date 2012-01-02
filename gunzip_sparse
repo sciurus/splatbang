@@ -1,0 +1,41 @@
+#!/bin/bash
+
+VERBOSE=''
+
+while getopts ':v' option; do
+    case $option in
+        v)
+            VERBOSE='yep'
+            ;;
+        *)
+            echo "Invalid option: -$OPTARG"
+            exit 1
+            ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+INPUT="$1"
+OUTPUT=${INPUT%.gz}
+
+if [ ! -f "$INPUT" ]; then
+    echo "Input does not exist: $INPUT"
+    exit 1
+fi
+if [ -f "$OUTPUT" ]; then
+    echo "Output already exists: $OUTPUT"
+    exit 1
+fi
+
+if [ "$VERBOSE" ]; then
+    PV=$(which pv)
+    if [ "$PV" ]; then
+        gunzip -c "$INPUT" | pv | cp --sparse=always /dev/stdin "$OUTPUT"
+    else
+        echo "pv must be installed to use verbose mode"
+        exit 1
+    fi
+else
+    gunzip -c "$INPUT" | cp --sparse=always /dev/stdin "$OUTPUT"
+fi

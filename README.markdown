@@ -1,5 +1,6 @@
 This is a catchall repository for tracking handy scripts too simple to justify their own repository.
 
+ * gunzip_sparse: wrapper for gunzip that makes the output a sparse file
  * iscsi: simplifies use of iscsiadm
  * lastday: execute a command on last day of the month
  * ping\_instance: report reachability of an oracle instance

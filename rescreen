@@ -40,4 +40,4 @@ for CHILD_PID in $(ps --ppid $PID -o 'pid='); do
     fi
 done
 
-screen -r $SCREEN
+screen -r $SCREEN_NAME

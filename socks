@@ -1,12 +1,16 @@
 #!/bin/sh
 
+# NOTE: You may find https://github.com/apenwarr/sshuttle more useful
+
+PORT=8080
+
 if [ $# -ne 1 ]
 then
   echo "Usage: socks hostname"
   exit 255
 fi
 
-EXISTING=$(pgrep -f 'ssh -fND 8080')
+EXISTING=$(pgrep -f "ssh -fND $PORT")
 
 if [ $? = 0 ]
 then
@@ -14,11 +18,11 @@ then
   kill $EXISTING
 fi
 
-ssh -fND 8080 $1
+ssh -fND $PORT $1
 
 if [ $? = 0 ]
 then
-  echo "SOCKS tunnel established on port 8080 to $1"
+  echo "SOCKS tunnel established on port $PORT to $1"
 else
   exit $?
 fi

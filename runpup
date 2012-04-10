@@ -1,0 +1,11 @@
+#!/bin/sh
+
+LOG=/var/log/puppet/agent.log
+
+COMMAND="sudo pkill -SIGUSR1 puppetd && sudo tail -f $LOG"
+
+if [ -n "$1" ]; then
+   ssh -t $1 "$COMMAND"
+else
+    $COMMAND
+fi

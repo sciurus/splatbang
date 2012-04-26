@@ -1,0 +1,53 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 address newspage"
+    echo "E.G. $0 https://sites.google.com/a/medinacommunityband.org/www announcements"
+    exit 1
+fi
+
+# trim trailing slash if present
+SITE=${1%/}
+NEWS=${2%/}
+
+if [ ${SITE:0:27} != 'https://sites.google.com/a/' ]; then
+    echo 'I only know how to fetch sites hosted at https://sites.google.com/a/'
+    exit 1
+fi
+
+type wget > /dev/null
+if [ $? == 1 ]; then
+    echo "Could not find the wget command. Make sure it is installed and in your path"
+    exit 1
+fi
+
+LINKS=$(mktemp)
+
+STORY_PATTERN="${SITE:24}/$NEWS/[a-z0-9\-]+"
+INDEX_PATTERN="${SITE:24}/$NEWS/posts"
+
+OFFSET=0
+FOUND_STORIES=0
+
+echo "Finding news stories"
+
+while [ $FOUND_STORIES == 0 ]; do
+    wget -nv -O - "$SITE/$NEWS?offset=$OFFSET" | grep -F -h -v $INDEX_PATTERN | grep -E -h -o $STORY_PATTERN >> $LINKS
+    FOUND_STORIES=$?
+    OFFSET=$(($OFFSET+10))
+done
+
+# extract regex from beginning of string
+STORY_COUNT=$(expr "$(wc -l $LINKS)" : '\([0-9]*\)')
+
+if [ $OFFSET -eq 0 ]; then
+    echo "Failed to find any news stories at $SITE/$NEWS"
+    exit 1
+else
+    echo "Found $STORY_COUNT news stories"
+    echo 'Downloading news stories'
+fi
+
+wget -nv -i $LINKS -B 'https://sites.google.com'
+
+rm $LINKS

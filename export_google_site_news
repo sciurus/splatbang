@@ -16,7 +16,7 @@ if [ ${SITE:0:27} != 'https://sites.google.com/a/' ]; then
 fi
 
 type wget > /dev/null
-if [ $? == 1 ]; then
+if [ $? -eq 1 ]; then
     echo "Could not find the wget command. Make sure it is installed and in your path"
     exit 1
 fi
@@ -31,7 +31,7 @@ FOUND_STORIES=0
 
 echo "Finding news stories"
 
-while [ $FOUND_STORIES == 0 ]; do
+while [ $FOUND_STORIES -eq 0 ]; do
     wget -nv -O - "$SITE/$NEWS?offset=$OFFSET" | grep -F -h -v $INDEX_PATTERN | grep -E -h -o $STORY_PATTERN >> $LINKS
     FOUND_STORIES=$?
     OFFSET=$(($OFFSET+10))

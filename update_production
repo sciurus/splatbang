@@ -15,7 +15,7 @@ EXCLUDE=""
 
 # update database of available updates
 sudo yum check-update > /dev/null
-if [ $? = 1 ]; then
+if [ $? -eq 1 ]; then
     echo "Error fetching available updates"
     exit 1
 fi

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ! $# = 1 ]; then
+if [ $# -ne 1 ]; then
     echo "Usage: rescreen sessionname"
     exit 1
 fi
@@ -30,6 +30,7 @@ if [ -z "$PID_AND_NAME" ]; then
     echo "There is no screen to be resumed matching $SESSION."
     exit 1
 fi
+# remove longest match from end
 PID=${PID_AND_NAME%%.$SESSION}
 
 if [ -f "$OUTPUT" ]; then

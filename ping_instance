@@ -15,9 +15,9 @@ fi
 
 # match errors like TNS-12543: TNS:destination host unreachable
 tnsping $INSTANCE | egrep -q '[A-Z]{3}-[0-9]{5}'
-NO_ERROR=$?
+ERROR_MATCHED=$?
 
-if [ $NO_ERROR == 0 ]; then
+if [ $ERROR_MATCHED -eq 0 ]; then
     echo Could not connect to $INSTANCE
     tnsping $INSTANCE
     exit 1

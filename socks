@@ -12,7 +12,7 @@ fi
 
 EXISTING=$(pgrep -f "ssh -fND $PORT")
 
-if [ $? = 0 ]
+if [ $? -eq 0 ]
 then
   echo "Killing existing tunnel $EXISTING"
   kill $EXISTING
@@ -20,7 +20,7 @@ fi
 
 ssh -fND $PORT $1
 
-if [ $? = 0 ]
+if [ $? -eq 0 ]
 then
   echo "SOCKS tunnel established on port $PORT to $1"
 else

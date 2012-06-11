@@ -2,8 +2,13 @@
 set -u
 
 REPOS="base updates cr epel"
-AGE="7"
 EXCLUDE=""
+
+if [ $# -eq 1 ]; then
+    AGE="$1"
+else
+    AGE="7"
+fi
 
 # i'm not sure of the exact meaning of time_file or time_build
 # but time_file seems to better reflect when things are added to centos archives
